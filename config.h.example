@@ -1,0 +1,19 @@
+#define LED_BUILTIN 2
+
+#define LED_PIN     13
+#define NUM_LEDS    38
+#define BRIGHTNESS  255
+#define LED_TYPE    WS2811
+#define COLOR_ORDER BRG
+
+
+const char* ssid = "........";
+const char* password = "..........";
+
+
+#define MQTT_CLIENT "esp32-sanca-1"
+const char* mqtt_server = "192.168.1.105";
+
+
+#define OTA_HOST "esp32-sanca-1"
+#define OTA_PASS "123456"

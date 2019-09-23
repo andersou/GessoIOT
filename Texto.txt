@@ -1,0 +1,6 @@
+Temp de cor aprox da luminaria: 2100
+
+Sanca interna: 
+38 leds
+
+Sanca externa:
