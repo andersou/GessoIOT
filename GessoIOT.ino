@@ -1,6 +1,8 @@
 
 #include <stdint.h>
 #include "config.h"
+#include <Preferences.h>
+Preferences prefsMan;
 
 enum modoOperacao_e
 {
@@ -25,9 +27,22 @@ struct gessoIOTPrefs_t
   } cor;
 } prefs;
 
+
+
 void setup()
 {
+  //carregar configuracoes
+  prefsMan.begin("prefs");
+  size_t prefsLen = prefsMan.getBytesLength("prefs");
+  //se nao existe crio a config default
+  if (prefsLen != sizeof(gessoIOTPrefs_t)) {
+    prefsMan.clear();
+    prefsMan.putBytes("prefs", &prefs, sizeof(gessoIOTPrefs_t));
 
+  }
+  prefsMan.getBytes("prefs", &prefs,  sizeof(gessoIOTPrefs_t));
+  prefsMan.end();
+  
   Serial.begin(115200);
   Serial.println("Booting");
   OTAsetup();

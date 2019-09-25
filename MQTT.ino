@@ -5,11 +5,11 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 /*
-/CLIENT/modo ou /modo -> 0= MODO_TEMP_COR, MODO_COR, MODO_PALETA, MODO_FESTA
-/temperatura_de_cor   -> temperatura em kelvin
-/cor                  -> R,G,B
-/paleta               -> -1 ... 10 -> 
-       -1: 
+  /CLIENT/modo ou /modo -> 0= MODO_TEMP_COR, MODO_COR, MODO_PALETA, MODO_FESTA
+  /temperatura_de_cor   -> temperatura em kelvin
+  /cor                  -> R,G,B
+  /paleta               -> -1 ... 10 ->
+       -1:
          troca periodicamente
        0:
         RainbowColors_p LINEARBLEND
@@ -64,17 +64,17 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   else if (top.endsWith("cor"))
   {
-    if(pl.indexOf("rgb") != -1){
+    if (pl.indexOf("rgb") != -1) {
       prefs.cor.rgb.r = pl.substring(4).toInt();
-      uint8_t pos = pl.indexOf(",") +1;
+      uint8_t pos = pl.indexOf(",") + 1;
       prefs.cor.rgb.g = pl.substring(pos).toInt();
-      
-      pos = pl.indexOf(",",pos) +1;
-      prefs.cor.rgb.b= pl.substring(pos).toInt();
-      
-      }else{
-    prefs.cor.valor = pl.toInt();
-      }
+
+      pos = pl.indexOf(",", pos) + 1;
+      prefs.cor.rgb.b = pl.substring(pos).toInt();
+
+    } else {
+      prefs.cor.valor = pl.toInt();
+    }
     prefs.modoOperacao = MODO_COR;
   }
   else if (top.endsWith("paleta"))
@@ -88,8 +88,10 @@ void callback(char *topic, byte *payload, unsigned int length)
     if (modo > 0 && modo < TOTAL_MODOS)
       prefs.modoOperacao = MODO_PALETA;
   }
-
-  client.publish(MQTT_CLIENT "/modo", String(prefs.modoOperacao).c_str());
+  //salvo prefs
+  prefsMan.begin("prefs");
+  prefsMan.putBytes("prefs", &prefs, sizeof(gessoIOTPrefs_t));
+  prefsMan.end();
 }
 
 void reconnect()
