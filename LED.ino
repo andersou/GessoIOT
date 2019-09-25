@@ -1,27 +1,20 @@
 #include <FastLED.h>
 
 
-long tempCor = 2100;
 
 CRGB leds[NUM_LEDS];
 
-#define UPDATES_PER_SECOND 60
+#define UPDATES_PER_SECOND 100
 
 
 CRGBPalette16 currentPalette;
 TBlendType    currentBlending;
+int currentColorIncrement = 3;
 
 extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
 
-void LEDsetup() {
-  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
-  FastLED.setBrightness(  BRIGHTNESS );
-
-  currentPalette = RainbowColors_p;
-  currentBlending = LINEARBLEND;
-}
 
 long lastPaleta = 0;
 long ms_update = 1000 / UPDATES_PER_SECOND;
@@ -32,8 +25,69 @@ void modoPaleta()
     return;
   }
   lastPaleta = nowLoop;
-  ChangePalettePeriodically();
-
+  currentColorIncrement = 3;
+  if (prefs.cor.valor == -1) {
+    ChangePalettePeriodically();
+  } else {
+    
+    switch (prefs.cor.valor) {
+      default:
+      case 0:
+        currentPalette = RainbowColors_p;
+        currentBlending = LINEARBLEND;
+        break;
+      case 1:
+        currentPalette = RainbowStripeColors_p;
+        currentBlending = NOBLEND;
+        break;
+      case 2:
+        currentPalette = RainbowStripeColors_p;
+        currentBlending = LINEARBLEND;
+        break;
+      case 3:
+        SetupPurpleAndGreenPalette();
+        currentBlending = LINEARBLEND;
+        break;
+      case 4:
+        SetupTotallyRandomPalette();
+        currentBlending = LINEARBLEND;
+        break;
+      case 5:
+        SetupBlackAndWhiteStripedPalette();
+        currentBlending = NOBLEND;
+        break;
+      case 6:
+        SetupBlackAndWhiteStripedPalette();
+        currentBlending = LINEARBLEND;
+        break;
+      case 7:
+        currentPalette = CloudColors_p;
+        currentBlending = LINEARBLEND;
+        break;
+      case 8:
+        currentPalette = PartyColors_p;
+        currentBlending = LINEARBLEND;
+        break;
+      case 9:
+        currentPalette = myRedWhiteBluePalette_p;
+        currentBlending = NOBLEND;
+        break;
+      case 10:
+        currentPalette = myRedWhiteBluePalette_p;
+        currentBlending = LINEARBLEND;
+        break;
+        case 11:
+        SetupNatalPalette();
+        currentColorIncrement = 12;
+        currentBlending = LINEARBLEND;
+        break;
+         case 12:
+        SetupNatalPalette();
+        currentColorIncrement = 12;
+        currentBlending = NOBLEND;
+        break;
+    }
+  }
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1; /* motion speed */
 
@@ -44,23 +98,7 @@ void modoPaleta()
 }
 
 
-void LEDloop() {
 
-  switch (prefs.modoOperacao) {
-    case MODO_PALETA:
-      modoPaleta();
-      break;
-    case MODO_TEMP_COR:
-      for (int i = 0; i < NUM_LEDS; i++) {
-        int r, g, b;
-        temp2rgb(tempCor, &r, &g, &b);
-        leds[i] = CRGB(r, g, b);
-      }
-      break;
-  }
-  FastLED.show();
-
-}
 
 void FillLEDsFromPaletteColors( uint8_t colorIndex)
 {
@@ -68,7 +106,7 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex)
 
   for ( int i = 0; i < NUM_LEDS; i++) {
     leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
-    colorIndex += 3;
+    colorIndex += currentColorIncrement;
   }
 }
 
@@ -172,7 +210,18 @@ void SetupPurpleAndGreenPalette()
                      green,  green,  black,  black,
                      purple, purple, black,  black );
 }
+void SetupNatalPalette()
+{
+  CRGB red = CRGB( 255, 0, 0);
+  CRGB green  = CRGB( 0, 255, 0);
+  CRGB black  = CRGB::Black;
 
+  currentPalette = CRGBPalette16(
+                     red,  black,  green,  black,
+                     red, black, green,  black,
+                     red, black, green,  black,
+                     red, black, green,  black );
+}
 
 // This example shows how to set up a static color palette
 // which is stored in PROGMEM (flash), which is almost always more
@@ -199,3 +248,35 @@ const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM =
   CRGB::Black,
   CRGB::Black
 };
+
+void LEDsetup() {
+  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
+  FastLED.setBrightness(  BRIGHTNESS );
+
+  currentPalette = RainbowColors_p;
+  currentBlending = LINEARBLEND;
+}
+void LEDloop() {
+  switch (prefs.modoOperacao) {
+    case MODO_PALETA:
+      modoPaleta();
+      break;
+    case MODO_TEMP_COR:
+      int r, g, b;
+      temp2rgb(prefs.cor.valor, &r, &g, &b);
+      for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CRGB(r, g, b);
+      }
+      break;
+    case MODO_COR:
+      for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CRGB(prefs.cor.rgb.r, prefs.cor.rgb.g, prefs.cor.rgb.b);
+      }
+      break;
+
+      break;
+  }
+
+  FastLED.show();
+
+}

@@ -1,6 +1,7 @@
 Temp de cor aprox da luminaria: 2100
 
 Sanca interna: 
-38 leds
+38 controladores
 
-Sanca externa:
+Sanca externa 
+88 controladores

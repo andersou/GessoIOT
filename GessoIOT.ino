@@ -8,14 +8,13 @@ enum modoOperacao_e
   MODO_COR,
   MODO_PALETA,
   MODO_FESTA,
-  MODO_NATAL,
   TOTAL_MODOS
 };
 struct gessoIOTPrefs_t
 {
   enum modoOperacao_e modoOperacao;
   union {
-    uint32_t valor; // salvo aqui tambem a cor em 32bits 0x00RRGGBB, temp de cor e nr da paleta
+    int32_t valor; // salvo aqui tambem a cor em 32bits 0x00RRGGBB, temp de cor e nr da paleta
     struct
     {
       uint8_t b;
@@ -36,7 +35,6 @@ void setup()
   MQTTsetup();
   pinMode(LED_BUILTIN, OUTPUT);
 }
-
 void loop()
 {
   OTAloop();

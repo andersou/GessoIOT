@@ -5,10 +5,38 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 /*
-/CLIENT/modo ou /modo -> 0= MODO_TEMP_COR, MODO_COR, MODO_PALETA, MODO_FESTA, MODO_NATAL
+/CLIENT/modo ou /modo -> 0= MODO_TEMP_COR, MODO_COR, MODO_PALETA, MODO_FESTA
 /temperatura_de_cor   -> temperatura em kelvin
 /cor                  -> R,G,B
-/paleta               -> 0 ... 9
+/paleta               -> -1 ... 10 -> 
+       -1: 
+         troca periodicamente
+       0:
+        RainbowColors_p LINEARBLEND
+       1:
+        RainbowStripeColors_p NOBLEND
+       2:
+        RainbowStripeColors_p LINEARBLEND
+       3:
+        PurpleAndGreenPalette LINEARBLEND
+       4:
+        TotallyRandomPalette LINEARBLEND
+       5:
+        BlackAndWhiteStripedPalette NOBLEND
+       6:
+        BlackAndWhiteStripedPalette LINEARBLEND
+       7:
+        CloudColors_p LINEARBLEND
+       8:
+        PartyColors_p LINEARBLEND
+       9:
+        RedWhiteBluePalette_p NOBLEND;
+       10:
+        RedWhiteBluePalette_p LINEARBLEND;
+       11:
+        Natal LINEARBLEND;
+       12:
+        Natal NOBLEND;
 
 */
 String topicos[] = {"/modo", "/temperatura_de_cor", "/cor", "/paleta", ""};
@@ -36,7 +64,17 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   else if (top.endsWith("cor"))
   {
+    if(pl.indexOf("rgb") != -1){
+      prefs.cor.rgb.r = pl.substring(4).toInt();
+      uint8_t pos = pl.indexOf(",") +1;
+      prefs.cor.rgb.g = pl.substring(pos).toInt();
+      
+      pos = pl.indexOf(",",pos) +1;
+      prefs.cor.rgb.b= pl.substring(pos).toInt();
+      
+      }else{
     prefs.cor.valor = pl.toInt();
+      }
     prefs.modoOperacao = MODO_COR;
   }
   else if (top.endsWith("paleta"))
@@ -51,7 +89,7 @@ void callback(char *topic, byte *payload, unsigned int length)
       prefs.modoOperacao = MODO_PALETA;
   }
 
-  client.publish(MQTT_CLIENT "/modo", String(prefs.modoOperacao));
+  client.publish(MQTT_CLIENT "/modo", String(prefs.modoOperacao).c_str());
 }
 
 void reconnect()
@@ -61,16 +99,14 @@ void reconnect()
   // Attempt to connect
   if (client.connect(clientId.c_str()))
   {
-    char buff[100];
     String s = topicos[0];
     int i = 0;
     while (!s.isEmpty())
     {
       client.subscribe(s.c_str());
-      s = String("/") + String(MQTT_CLIENT) + s;
-      client.subscribe(s.c_str());
       s = topicos[++i];
     }
+    client.subscribe("/"MQTT_CLIENT"/#");
   }
   else
   {
