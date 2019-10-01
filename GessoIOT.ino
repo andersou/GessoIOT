@@ -8,6 +8,7 @@ enum modoOperacao_e
 {
   MODO_TEMP_COR,
   MODO_COR,
+  MODO_COR_HSV,
   MODO_PALETA,
   MODO_FESTA,
   TOTAL_MODOS
@@ -24,6 +25,12 @@ struct gessoIOTPrefs_t
       uint8_t r;
       uint8_t trash;
     } rgb;
+    struct
+    {
+      uint16_t h;
+      uint8_t s;
+      uint8_t v;
+    } hsv;
   } cor;
 } prefs;
 

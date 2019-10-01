@@ -29,7 +29,7 @@ void modoPaleta()
   if (prefs.cor.valor == -1) {
     ChangePalettePeriodically();
   } else {
-    
+
     switch (prefs.cor.valor) {
       default:
       case 0:
@@ -76,12 +76,12 @@ void modoPaleta()
         currentPalette = myRedWhiteBluePalette_p;
         currentBlending = LINEARBLEND;
         break;
-        case 11:
+      case 11:
         SetupNatalPalette();
         currentColorIncrement = 12;
         currentBlending = LINEARBLEND;
         break;
-         case 12:
+      case 12:
         SetupNatalPalette();
         currentColorIncrement = 12;
         currentBlending = NOBLEND;
@@ -273,7 +273,11 @@ void LEDloop() {
         leds[i] = CRGB(prefs.cor.rgb.r, prefs.cor.rgb.g, prefs.cor.rgb.b);
       }
       break;
-
+    case MODO_COR_HSV:
+      for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CHSV(prefs.cor.hsv.h, prefs.cor.hsv.s, prefs.cor.hsv.v);
+      }
+      break;
       break;
   }
 

@@ -7,7 +7,7 @@ PubSubClient client(espClient);
 /*
   /CLIENT/modo ou /modo -> 0= MODO_TEMP_COR, MODO_COR, MODO_PALETA, MODO_FESTA
   /temperatura_de_cor   -> temperatura em kelvin
-  /cor                  -> R,G,B
+  /cor                  -> rgb(R,G,B), ou H,S,V
   /paleta               -> -1 ... 10 ->
        -1:
          troca periodicamente
@@ -64,18 +64,29 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   else if (top.endsWith("cor"))
   {
+    prefs.modoOperacao = MODO_COR;
+    uint8_t pos;
     if (pl.indexOf("rgb") != -1) {
       prefs.cor.rgb.r = pl.substring(4).toInt();
-      uint8_t pos = pl.indexOf(",") + 1;
+      pos = pl.indexOf(",") + 1;
       prefs.cor.rgb.g = pl.substring(pos).toInt();
 
       pos = pl.indexOf(",", pos) + 1;
       prefs.cor.rgb.b = pl.substring(pos).toInt();
 
+    } else if ((pos=pl.indexOf(",")) != -1) //cor em hsv
+    {
+      prefs.modoOperacao = MODO_COR_HSV;
+      prefs.cor.hsv.h = map(pl.toInt(),0,360,0,255);
+      pos=pl.indexOf(",") + 1;
+      prefs.cor.hsv.s =  map(pl.substring(pos).toInt(),0,100,0,255);
+      pos=pl.indexOf(",",pos) + 1;
+      prefs.cor.hsv.v =  map(pl.substring(pos).toInt(),0,100,0,255);
+      
     } else {
       prefs.cor.valor = pl.toInt();
     }
-    prefs.modoOperacao = MODO_COR;
+    
   }
   else if (top.endsWith("paleta"))
   {
